@@ -1,0 +1,20 @@
+wordpress:
+  image: wordpress
+  dbhost: 127.0.0.1:3306
+
+cloudsql:
+  proxyImage: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.0
+  instanceConnectionName: coen-asil-carlin:europe-west3:wordpress-db
+
+namespace:
+  create: true
+  name: wordpress
+
+serviceAccount:
+  create: true
+  name: wordpress-sa
+  gcp_sa: wordpress-sa@coen-asil-carlin.iam.gserviceaccount.com
+
+service:
+    type: ClusterIP
+    port: 80

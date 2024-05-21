@@ -1,0 +1,46 @@
+name: Deploy wordpress helm chart on GKE
+on:
+  workflow_dispatch:
+    inputs:
+      manual_deploy:
+        description: 'Trigger manual deployment'
+        default: 'true'
+        required: false
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  Deploy_wordpress_GKE:
+    runs-on: ubuntu-latest
+    steps:
+
+    - id: 'checkout_repo'
+      name: Check out the repo  
+      uses: actions/checkout@v4
+
+    - id: 'auth'
+      name: 'Authenticate to GCP'
+      uses: 'google-github-actions/auth@v2'
+      with:
+          create_credentials_file: 'true'
+          workload_identity_provider: 'projects/545177491072/locations/global/workloadIdentityPools/github-test-autm-pool/providers/github-test-autm-provider'
+          service_account: 'autm-github-test-sa@coen-asil-carlin.iam.gserviceaccount.com'
+  
+    - id: 'gke-credentials'
+      name: Set up GKE credentials
+      uses: google-github-actions/get-gke-credentials@v2
+      with:
+        cluster_name: testclus01
+        location: europe-west3
+
+    - id: 'helm-setup'
+      name: Install Helm
+      run: |
+        curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+
+    - id: 'helm-deploy'
+      name: 'Deploy Helm chart'
+      run: |
+        helm upgrade --install wordpress-gke ./wordpress
